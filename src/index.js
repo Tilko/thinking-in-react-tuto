@@ -10,12 +10,16 @@ class FilterableProductTable extends React.Component {
             inStockOnly: true,
             searchedText: 'ball'
         }
+        this.onSearchTextChange = text => this.setState({ searchedText: text });
+        this.onStockedOnlyChange = inStockOnly => this.setState({ inStockOnly });
     }
     render() {
         return (
             <div>
                 <SearchBar searchedText={this.state.searchedText}
-                    inStockOnly={this.state.inStockOnly} />
+                    inStockOnly={this.state.inStockOnly}
+                    onSearchTextChange={this.onSearchTextChange}
+                    onStockedOnlyChange={this.onStockedOnlyChange} />
                 <ProductTable products={this.props.products}
                     inStockOnly={this.state.inStockOnly}
                     searchedText={this.state.searchedText} />
@@ -26,20 +30,24 @@ class FilterableProductTable extends React.Component {
 class SearchBar extends React.Component {
     constructor(props) {
         super(props)
+        this.onStockedOnlyChange = e => props.onStockedOnlyChange(e.target.checked);
+        this.onSearchTextChange = e => props.onSearchTextChange(e.target.value)
     }
     render() {
         return (
             <div>
-                <input type='text' value={this.props.searchedText} placeholder='Search...' />
+                <input type='text'
+                    value={this.props.searchedText}
+                    onChange={this.onSearchTextChange}
+                    placeholder='Search...' />
                 <p>
                     <input
                         type="checkbox"
-                        checked={this.props.inStockOnly}//this.state.isGoing}
-                    //onChange={this.handleInputChange} 
+                        checked={this.props.inStockOnly}
+                        onChange={this.onStockedOnlyChange}
                     />
                 Only show products in stock
                 </p>
-
             </div>
         );
     }
