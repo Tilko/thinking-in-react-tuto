@@ -3,14 +3,25 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import { groupBy } from './libs/Functional';
 
-function FilterableProductTable(props) {
-    return (
-        <div>
-            <SearchBar />
-            <ProductTable products={props.products} />
-        </div>
-
-    );
+class FilterableProductTable extends React.Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            inStockOnly: true,
+            searchedText: 'ball'
+        }
+    }
+    render() {
+        return (
+            <div>
+                <SearchBar searchedText={this.state.searchedText}
+                    inStockOnly={this.state.inStockOnly} />
+                <ProductTable products={this.props.products}
+                    inStockOnly={this.state.inStockOnly}
+                    searchedText={this.state.searchedText} />
+            </div >
+        );
+    }
 }
 class SearchBar extends React.Component {
     constructor(props) {
@@ -19,12 +30,16 @@ class SearchBar extends React.Component {
     render() {
         return (
             <div>
-                <input type='text' placeholder='Search...' />
-                <input
-                    type="checkbox"
-                    checked={true}//this.state.isGoing}
-                //onChange={this.handleInputChange} 
-                />
+                <input type='text' value={this.props.searchedText} placeholder='Search...' />
+                <p>
+                    <input
+                        type="checkbox"
+                        checked={this.props.inStockOnly}//this.state.isGoing}
+                    //onChange={this.handleInputChange} 
+                    />
+                Only show products in stock
+                </p>
+
             </div>
         );
     }
@@ -32,10 +47,13 @@ class SearchBar extends React.Component {
 
 function ProductTable(props) {
     const rows = [];
-    for (let entry of groupBy(props.products, p => p.category).entries()) {
-        const [category, products] = entry;
-        console.log("category:" + category)
-        console.log("products:" + products)
+    const filteredProds = props.products.filter(product => {
+        if (props.inStockOnly && !product.stocked)
+            return false;
+        return product.name.includes(props.searchedText);
+    });
+
+    for (let [category, products] of groupBy(filteredProds, p => p.category).entries()) {
         rows.push(<ProductCategoryRow
             category={category}
             key={category}
@@ -45,7 +63,6 @@ function ProductTable(props) {
             key={product.name}
         />))
     }
-    console.log("rows.len:" + rows.length);
     return (
         <table>
             <thead>
